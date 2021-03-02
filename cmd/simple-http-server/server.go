@@ -2,25 +2,31 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
-)
 
-type Customer struct {
-	Id   string
-	Name string
-}
+	"github.com/mccantuta/simple-http-server/pkg/model"
+)
 
 func customerHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		fmt.Fprintf(w, "Testing GET")
+		data, e := model.GetCustomer()
+		if e != nil {
+			log.Fatal("Error getting Customers")
+		}
+		w.Write(data)
 	case http.MethodPost:
-		fmt.Fprintf(w, "Testing POST")
+		data, e := ioutil.ReadAll(r.Body)
+		if e != nil {
+			log.Fatal("Error reading the request body")
+		}
+		result := model.PostCustomer(data)
+		w.Write([]byte(result))
 	default:
-		fmt.Fprintf(w, "Testing")
+		fmt.Fprintf(w, "Not supported operation")
 	}
-
 }
 
 func main() {
